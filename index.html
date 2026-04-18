@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aprendendo com Amor - V8 Oficial</title>
+    <style>
+        :root { --primary: #ff6b6b; --secondary: #4ecdc4; --dark: #2d3436; --light: #f8f9fa; --gray: #95a5a6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); margin: 0; padding-bottom: 80px; color: var(--dark); overflow-x: hidden; }
+        
+        /* LOGIN TOTAL */
+        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; align-items: center; justify-content: center; z-index: 5000; }
+        .login-box { text-align: center; width: 85%; max-width: 320px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+        /* NAVEGAÇÃO */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.08); z-index: 1000; }
+        .nav-item { border: none; background: none; color: var(--gray); font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; width: 25%; }
+        .nav-item.active { color: var(--primary); font-weight: bold; }
+
+        .app-header { background: white; padding: 15px; text-align: center; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 900; }
+        .app-header h1 { margin: 0; font-size: 20px; color: var(--primary); letter-spacing: -1px; }
+
+        .section { display: none; padding: 15px; max-width: 600px; margin: auto; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        
+        /* ALUNOS E AGENDA */
+        .item-aluno { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #f8f8f8; cursor: pointer; background: white; border-radius: 10px; margin-bottom: 8px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .btn-sec { background: #f1f3f5; color: #495057; }
+        
+        input, select, textarea { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #e9ecef; border-radius: 10px; box-sizing: border-box; font-size: 16px; background: #f8f9fa; }
+        
+        .day-selector { display: flex; gap: 8px; margin: 10px 0; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+        .day-btn { padding: 10px 18px; border: 1px solid #dee2e6; border-radius: 25px; font-size: 13px; white-space: nowrap; cursor: pointer; background: white; flex-shrink: 0; }
+        .day-btn.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+
+        .mes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .mes-item { border: 1px solid #eee; padding: 12px 5px; text-align: center; border-radius: 10px; font-size: 12px; cursor: pointer; background: #fff; }
+        .mes-pago { background: var(--secondary); color: white; border-color: var(--secondary); font-weight: bold; }
+
+        .slot-hora { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #f8f8f8; }
+        .time-label { background: var(--secondary); color: white; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 13px; min-width: 60px; text-align: center; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; justify-content: center; align-items: flex-end; }
+        .modal-content { background: white; padding: 25px; border-radius: 25px 25px 0 0; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1 style="font-size: 50px; margin:0;">❤️</h1>
+        <h2 style="color:var(--dark);">Aprendendo com Amor</h2>
+        <p style="color:var(--gray); font-size: 14px;">Controle Pedagógico</p>
+        <input type="password" id="pass-input" placeholder="Sua senha de acesso">
+        <button class="btn" onclick="checkLogin()">Entrar agora</button>
+    </div>
+</div>
+
+<div class="app-header"><h1>❤️ Aprendendo com Amor</h1></div>
+
+<section id="aba-inicio" class="section active">
+    <div class="card" style="text-align:center; background: linear-gradient(135deg, #ff6b6b, #ff8787); color: white;">
+        <h3 style="margin:0;">Olá, bem-vinda!</h3>
+        <p id="hoje-data" style="opacity: 0.9; font-size:13px; margin-top:5px;"></p>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+        <div class="card" style="border-left: 5px solid #2ecc71;"><small style="color:var(--gray)">Recebido (Mês)</small><p id="dash-recebido" style="font-size:20px; font-weight:bold; margin:5px 0; color:#27ae60;">R$ 0,00</p></div>
+        <div class="card" style="border-left: 5px solid #e74c3c;"><small style="color:var(--gray)">Pendente</small><p id="dash-pendente" style="font-size:20px; font-weight:bold; margin:5px 0; color:#c0392b;">R$ 0,00</p></div>
+    </div>
+</section>
+
+<section id="aba-alunos" class="section">
+    <div id="lista-alunos"></div>
+    <button class="btn" style="position:fixed; bottom:90px; right:20px; width:65px; height:65px; border-radius:50%; font-size:30px; box-shadow: 0 5px 20px rgba(255,107,107,0.4); z-index:999;" onclick="abrirModalCadastro()">+</button>
+</section>
+
+<section id="aba-agenda" class="section">
+    <div class="day-selector">
+        <button class="day-btn active" onclick="filtrarAgenda('Segunda', this)">Segunda</button>
+        <button class="day-btn" onclick="filtrarAgenda('Terça', this)">Terça</button>
+        <button class="day-btn" onclick="filtrarAgenda('Quarta', this)">Quarta</button>
+        <button class="day-btn" onclick="filtrarAgenda('Quinta', this)">Quinta</button>
+        <button class="day-btn" onclick="filtrarAgenda('Sexta', this)">Sexta</button>
+    </div>
+    <div class="card" id="lista-agenda"></div>
+</section>
+
+<section id="aba-config" class="section">
+    <div class="card">
+        <h3>💾 Backup e Restauração</h3>
+        <p style="font-size:12px; color:var(--gray);">Baixe seus dados para segurança total.</p>
+        <button class="btn" onclick="exportarDados()" style="background:#2ecc71">📥 Salvar Arquivo de Backup</button>
+        <button class="btn btn-sec" onclick="document.getElementById('input-file').click()">📤 Abrir Arquivo de Backup</button>
+        <input type="file" id="input-file" style="display:none" onchange="importarDados(event)">
+    </div>
+    <div style="text-align:center; margin-top: 30px;">
+        <button onclick="logout()" style="background:none; border:none; color:red; font-size:12px; text-decoration:underline;">Redefinir Senha e Sair</button>
+    </div>
+</section>
+
+<nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('aba-inicio', this)">🏠<br>Início</button>
+    <button class="nav-item" onclick="switchTab('aba-alunos', this)">👥<br>Alunos</button>
+    <button class="nav-item" onclick="switchTab('aba-agenda', this)">⏰<br>Agenda</button>
+    <button class="nav-item" onclick="switchTab('aba-config', this)">⚙️<br>Mais</button>
+</nav>
+
+<div id="modalCadastro" class="modal">
+    <div class="modal-content">
+        <h2 id="tituloModal" style="margin-top:0; color:var(--primary)">Nova Matrícula</h2>
+        <input type="hidden" id="edit-id">
+        <input type="text" id="inNome" placeholder="Nome do Aluno">
+        <input type="text" id="inResp" placeholder="Nome do Pai ou Mãe">
+        <input type="text" id="inTel" placeholder="WhatsApp">
+        <input type="number" id="inValor" placeholder="Valor da Mensalidade R$">
+        <select id="inHorario">
+            <option value="13:00">13:00 às 14:00</option>
+            <option value="14:00">14:00 às 15:00</option>
+            <option value="15:00">15:00 às 16:00</option>
+            <option value="16:00">16:00 às 17:00</option>
+        </select>
+        <p style="font-size:12px; margin: 10px 0 5px 0;">Selecione os dias de aula:</p>
+        <div class="day-selector" id="inDias">
+            <span class="day-btn" onclick="this.classList.toggle('active')">Segunda</span>
+            <span class="day-btn" onclick="this.classList.toggle('active')">Terça</span>
+            <span class="day-btn" onclick="this.classList.toggle('active')">Quarta</span>
+            <span class="day-btn" onclick="this.classList.toggle('active')">Quinta</span>
+            <span class="day-btn" onclick="this.classList.toggle('active')">Sexta</span>
+        </div>
+        <button class="btn" onclick="salvarAluno()">Finalizar Cadastro</button>
+        <button class="btn btn-sec" onclick="fecharModais()">Voltar</button>
+    </div>
+</div>
+
+<div id="modalFicha" class="modal">
+    <div class="modal-content" id="fichaCorpo"></div>
+</div>
+
+<script>
+    // Versão 8 - Limpeza Total de Conflitos
+    const meses = ["Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const DB_NAME = 'amor_pedagogia_v8';
+    let alunos = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+    const horariosFixos = ["13:00", "14:00", "15:00", "16:00"];
+
+    // LOGIN
+    function checkLogin() {
+        const p = document.getElementById('pass-input').value;
+        const s = localStorage.getItem('amor_pass_v8');
+        if(!s) {
+            if(p.length < 1) return alert("Crie uma senha!");
+            localStorage.setItem('amor_pass_v8', p);
+            logar();
+        } else {
+            if(p === s) logar();
+            else alert("Senha incorreta!");
+        }
+    }
+    function logar() { 
+        document.getElementById('login-screen').style.display = 'none'; 
+        renderTudo();
+        filtrarAgenda('Segunda');
+    }
+
+    // NAVEGAÇÃO
+    function switchTab(tabId, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        el.classList.add('active');
+        renderTudo();
+    }
+
+    function fecharModais() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+
+    // CRUD
+    function abrirModalCadastro() {
+        document.getElementById('tituloModal').innerText = "Novo Aluno";
+        document.getElementById('edit-id').value = "";
+        document.getElementById('inNome').value = "";
+        document.getElementById('inResp').value = "";
+        document.getElementById('inTel').value = "";
+        document.getElementById('inValor').value = "";
+        document.querySelectorAll('#inDias .day-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('modalCadastro').style.display = 'flex';
+    }
+
+    function salvarAluno() {
+        const id = document.getElementById('edit-id').value;
+        const diasAtivos = Array.from(document.querySelectorAll('#inDias .active')).map(b => b.innerText);
+        const novo = {
+            nome: document.getElementById('inNome').value,
+            resp: document.getElementById('inResp').value,
+            tel: document.getElementById('inTel').value,
+            valor: parseFloat(document.getElementById('inValor').value) || 0,
+            horario: document.getElementById('inHorario').value,
+            dias: diasAtivos
+        };
+
+        if(!novo.nome) return alert("Digite o nome!");
+
+        if(id) {
+            const idx = alunos.findIndex(a => a.id == id);
+            alunos[idx] = { ...alunos[idx], ...novo };
+        } else {
+            alunos.push({ id: Date.now(), ...novo, historico: [], notas: "" });
+        }
+        
+        salvarDB();
+        fecharModais();
+        renderTudo();
+    }
+
+    function salvarDB() { localStorage.setItem(DB_NAME, JSON.stringify(alunos)); }
+
+    function renderTudo() {
+        renderInicio();
+        renderAlunos();
+    }
+
+    function renderInicio() {
+        let r = 0, p = 0;
+        const mesAtual = new Date().toLocaleDateString('pt-BR', {month: 'long'});
+        const mesF = mesAtual.charAt(0).toUpperCase() + mesAtual.slice(1);
+
+        alunos.forEach(al => {
+            if(al.historico.includes(mesF)) r += al.valor;
+            else p += al.valor;
+        });
+
+        document.getElementById('dash-recebido').innerText = `R$ ${r.toFixed(2)}`;
+        document.getElementById('dash-pendente').innerText = `R$ ${p.toFixed(2)}`;
+        document.getElementById('hoje-data').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function renderAlunos() {
+        const container = document.getElementById('lista-alunos');
+        container.innerHTML = "";
+        alunos.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(al => {
+            container.innerHTML += `
+                <div class="item-aluno" onclick="verFicha(${al.id})">
+                    <div><strong>${al.nome}</strong><br><small style="color:var(--gray)">Pais: ${al.resp || '---'}</small></div>
+                    <div style="text-align:right"><b>${al.horario}h</b><br><span style="color:var(--primary)">ver ficha</span></div>
+                </div>`;
+        });
+    }
+
+    function verFicha(id) {
+        const al = alunos.find(a => a.id == id);
+        document.getElementById('fichaCorpo').innerHTML = `
+            <div style="text-align:center; margin-bottom: 20px;">
+                <h2 style="margin:0; color:var(--primary)">${al.nome}</h2>
+                <small>WhatsApp: ${al.tel || '---'}</small>
+            </div>
+            
+            <p style="font-size:13px; margin:0"><b>Anotações do Professor:</b></p>
+            <textarea style="height:80px" onblur="salvarNota(${al.id}, this.value)" placeholder="Escreva aqui o progresso...">${al.notas || ''}</textarea>
+
+            <p style="font-size:13px; margin:15px 0 5px 0"><b>Pagamentos (Fev a Dez):</b></p>
+            <div class="mes-grid">
+                ${meses.map(m => `<div class="mes-item ${al.historico.includes(m) ? 'mes-pago' : ''}" onclick="toggleMes(${al.id}, '${m}')">${m}</div>`).join('')}
+            </div>
+
+            <button class="btn" style="margin-top:25px;" onclick="editarMatricula(${al.id})">✏️ Editar Cadastro</button>
+            <button class="btn btn-sec" onclick="fecharModais()">Fechar</button>
+            <button onclick="excluirAluno(${al.id})" style="color:red; background:none; border:none; width:100%; margin-top:20px; font-size:12px;">Remover do Sistema</button>
+        `;
+        document.getElementById('modalFicha').style.display = 'flex';
+    }
+
+    function editarMatricula(id) {
+        const al = alunos.find(a => a.id == id);
+        fecharModais();
+        abrirModalCadastro();
+        document.getElementById('tituloModal').innerText = "Editar Cadastro";
+        document.getElementById('edit-id').value = al.id;
+        document.getElementById('inNome').value = al.nome;
+        document.getElementById('inResp').value = al.resp;
+        document.getElementById('inTel').value = al.tel;
+        document.getElementById('inValor').value = al.valor;
+        document.getElementById('inHorario').value = al.horario;
+        document.querySelectorAll('#inDias .day-btn').forEach(b => {
+            if(al.dias.includes(b.innerText)) b.classList.add('active');
+        });
+    }
+
+    function filtrarAgenda(dia, el) {
+        if(el) { document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+        const lista = document.getElementById('lista-agenda');
+        lista.innerHTML = `<h3 style="margin-top:0">Aulas de ${dia}</h3>`;
+        horariosFixos.forEach(h => {
+            const al = alunos.find(a => a.dias.includes(dia) && a.horario === h);
+            lista.innerHTML += `
+                <div class="slot-hora">
+                    <span class="time-label">${h}</span>
+                    <strong style="${!al ? 'color:#ccc' : ''}">${al ? al.nome : 'Livre'}</strong>
+                </div>`;
+        });
+    }
+
+    function toggleMes(id, mes) {
+        const al = alunos.find(a => a.id == id);
+        if(al.historico.includes(mes)) al.historico = al.historico.filter(m => m !== mes);
+        else al.historico.push(mes);
+        salvarDB(); verFicha(id); renderInicio();
+    }
+
+    function salvarNota(id, t) { 
+        const al = alunos.find(a => a.id == id);
+        al.notas = t; salvarDB(); 
+    }
+
+    function excluirAluno(id) { if(confirm("Apagar todos os dados deste aluno?")) { alunos = alunos.filter(a => a.id != id); salvarDB(); renderTudo(); fecharModais(); } }
+
+    // BACKUP
+    function exportarDados() {
+        const data = JSON.stringify(alunos);
+        const blob = new Blob([data], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "backup_amor_pedagogia.json";
+        a.click();
+    }
+
+    function importarDados(e) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+            alunos = JSON.parse(ev.target.result);
+            salvarDB(); renderTudo();
+            alert("✅ Dados restaurados com sucesso!");
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    function logout() { if(confirm("Isso apagará sua senha e sairá. Continuar?")) { localStorage.removeItem('amor_pass_v8'); location.reload(); } }
+
+    // Inicialização segura
+    window.onload = () => {
+        // Se já tiver logado antes (sessão ativa nesta aba)
+        const s = localStorage.getItem('amor_pass_v8');
+        if(!s) document.getElementById('login-screen').style.display = 'flex';
+    };
+</script>
+</body>
+</html>
