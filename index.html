@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aprendendo com Amor</title>
+
+<style>
+
+:root{
+--primary:#ff6b6b;
+--secondary:#4ecdc4;
+--dark:#2d3436;
+--success:#27ae60;
+--danger:#e74c3c;
+--light:#f5f5f5;
+}
+
+*{
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+margin:0;
+background:var(--light);
+padding-bottom:90px;
+}
+
+.app-header{
+background:white;
+padding:15px;
+text-align:center;
+position:sticky;
+top:0;
+border-bottom:1px solid #ddd;
+z-index:10;
+}
+
+.section{
+display:none;
+padding:15px;
+max-width:700px;
+margin:auto;
+}
+
+.section.active{
+display:block;
+}
+
+.card{
+background:white;
+padding:15px;
+margin-bottom:15px;
+border-radius:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.05);
+}
+
+.btn{
+border:none;
+padding:13px;
+width:100%;
+border-radius:10px;
+background:var(--dark);
+color:white;
+font-weight:bold;
+cursor:pointer;
+margin-top:8px;
+}
+
+input,select,textarea{
+width:100%;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+margin-top:8px;
+}
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+justify-content:space-around;
+background:white;
+border-top:1px solid #ddd;
+padding:10px 0;
+}
+
+.nav-item{
+background:none;
+border:none;
+font-size:11px;
+color:gray;
+}
+
+.nav-item.active{
+color:var(--primary);
+font-weight:bold;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.7);
+justify-content:center;
+align-items:flex-end;
+}
+
+.modal-content{
+background:white;
+width:100%;
+max-width:600px;
+padding:20px;
+border-radius:20px 20px 0 0;
+max-height:90vh;
+overflow:auto;
+}
+
+#login-screen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+.login-box{
+width:90%;
+max-width:350px;
+padding:30px;
+background:white;
+border-radius:20px;
+box-shadow:0 5px 20px rgba(0,0,0,.1);
+text-align:center;
+border-top:5px solid var(--primary);
+}
+
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+<div class="login-box">
+
+<h2 style="color:#ff6b6b">
+APRENDENDO COM AMOR
+</h2>
+
+<input type="password" id="senha" placeholder="Senha">
+
+<button class="btn"
+style="background:#ff6b6b"
+onclick="login()">
+ENTRAR
+</button>
+
+</div>
+</div>
+
+<div id="main-content" style="display:none">
+
+<div class="app-header">
+<h2>APRENDENDO COM AMOR</h2>
+</div>
+
+<section id="inicio" class="section active">
+
+<div class="card">
+<h3 id="hoje"></h3>
+</div>
+
+<div class="card">
+Recebido no mês
+<h2 style="color:green" id="recebido">
+R$0,00
+</h2>
+</div>
+
+<div class="card">
+Pendente no mês
+<h2 style="color:red" id="pendente">
+R$0,00
+</h2>
+</div>
+
+<div class="card">
+Total de alunos
+<h2 id="total-alunos">
+0
+</h2>
+</div>
+
+</section>
+
+<section id="alunos" class="section">
+
+<input type="text"
+placeholder="Pesquisar aluno">
+
+<div id="lista-alunos">
+
+</div>
+
+<button class="btn"
+style="
+position:fixed;
+right:20px;
+bottom:100px;
+width:60px;
+height:60px;
+border-radius:50%;
+background:#ff6b6b"
+onclick="abrirCadastro()">
+
++
+
+</button>
+
+</section>
+
+<section id="agenda" class="section">
+
+<div id="lista-agenda">
+
+</div>
+
+</section>
+
+<section id="sistema" class="section">
+
+<div class="card">
+
+<button class="btn">
+FICHA DE MATRÍCULA
+</button>
+
+<button class="btn"
+style="background:green">
+EXPORTAR BACKUP
+</button>
+
+</div>
+
+</section>
+
+<nav class="bottom-nav">
+
+<button class="nav-item active"
+onclick="trocarAba('inicio',this)">
+🏠<br>INÍCIO
+</button>
+
+<button class="nav-item"
+onclick="trocarAba('alunos',this)">
+👥<br>ALUNOS
+</button>
+
+<button class="nav-item"
+onclick="trocarAba('agenda',this)">
+📅<br>AGENDA
+</button>
+
+<button class="nav-item"
+onclick="trocarAba('sistema',this)">
+⚙️<br>SISTEMA
+</button>
+
+</nav>
+
+</div>
+
+<div class="modal" id="modalCadastro">
+
+<div class="modal-content">
+
+<h3>Novo aluno</h3>
+
+<input id="nome" placeholder="Nome do aluno">
+
+<input id="responsavel"
+placeholder="Responsável">
+
+<input id="zap"
+placeholder="WhatsApp">
+
+<input id="valor"
+placeholder="Mensalidade">
+
+<input id="vencimento"
+placeholder="Dia do vencimento">
+
+<textarea id="obs"
+placeholder="Observações">
+</textarea>
+
+<button class="btn">
+SALVAR
+</button>
+
+</div>
+
+</div>
+<script>
+
+let alunos = JSON.parse(localStorage.getItem("alunos_reforco")) || [];
+
+function login(){
+    if(document.getElementById("senha").value==="reforco"){
+        document.getElementById("login-screen").style.display="none";
+        document.getElementById("main-content").style.display="block";
+        renderAlunos();
+        atualizarDashboard();
+    }else{
+        alert("Senha incorreta");
+    }
+}
+
+function trocarAba(id,botao){
+
+    document.querySelectorAll(".section")
+    .forEach(sec=>sec.classList.remove("active"));
+
+    document.querySelectorAll(".nav-item")
+    .forEach(btn=>btn.classList.remove("active"));
+
+    document.getElementById(id).classList.add("active");
+    botao.classList.add("active");
+
+}
+
+function abrirCadastro(){
+    document.getElementById("modalCadastro").style.display="flex";
+}
+
+function fecharCadastro(){
+    document.getElementById("modalCadastro").style.display="none";
+}
+
+function salvarAluno(){
+
+    let aluno={
+
+        id:Date.now(),
+
+        nome:document.getElementById("nome").value,
+
+        responsavel:document.getElementById("responsavel").value,
+
+        zap:document.getElementById("zap").value,
+
+        valor:document.getElementById("valor").value,
+
+        vencimento:document.getElementById("vencimento").value,
+
+        obs:document.getElementById("obs").value,
+
+        pagos:[]
+
+    };
+
+    if(aluno.nome==""){
+        alert("Digite o nome");
+        return;
+    }
+
+    alunos.push(aluno);
+
+    localStorage.setItem(
+        "alunos_reforco",
+        JSON.stringify(alunos)
+    );
+
+    fecharCadastro();
+
+    renderAlunos();
+
+    atualizarDashboard();
+
+}
+
+function renderAlunos(){
+
+    let lista=document.getElementById("lista-alunos");
+
+    lista.innerHTML="";
+
+    alunos.forEach(al=>{
+
+        lista.innerHTML+=`
+
+        <div class="card">
+
+        <b>${al.nome}</b>
+
+        <br>
+
+        Responsável: ${al.responsavel}
+
+        <br><br>
+
+        <button class="btn"
+        style="background:#25D366"
+        onclick="window.open('https://wa.me/55${al.zap}')">
+
+        WHATSAPP
+
+        </button>
+
+        <button class="btn"
+        style="background:red"
+        onclick="excluirAluno(${al.id})">
+
+        EXCLUIR
+
+        </button>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+function excluirAluno(id){
+
+if(confirm("Excluir aluno?")){
+
+alunos=alunos.filter(a=>a.id!=id);
+
+localStorage.setItem(
+"alunos_reforco",
+JSON.stringify(alunos)
+);
+
+renderAlunos();
+
+atualizarDashboard();
+
+}
+
+}
+
+function atualizarDashboard(){
+
+document.getElementById("total-alunos").innerHTML=alunos.length;
+
+let hoje=new Date();
+
+document.getElementById("hoje").innerHTML=
+hoje.toLocaleDateString(
+"pt-BR",
+{
+weekday:"long",
+day:"numeric",
+month:"long"
+});
+
+}
+
+document.querySelector("#modalCadastro .btn")
+.onclick=salvarAluno;
+
+</script>
+// PESQUISA DE ALUNOS
+
+function pesquisarAluno(){
+
+let texto=document.querySelector(
+'#alunos input[type="text"]'
+).value.toLowerCase();
+
+let lista=document.getElementById("lista-alunos");
+
+lista.innerHTML="";
+
+alunos
+.filter(a=>
+a.nome.toLowerCase().includes(texto)
+||
+a.responsavel.toLowerCase().includes(texto)
+)
+
+.forEach(al=>{
+
+lista.innerHTML+=`
+
+<div class="card">
+
+<b>${al.nome}</b>
+
+<br>
+
+Responsável: ${al.responsavel}
+
+<br><br>
+
+<button class="btn"
+style="background:#25D366"
+onclick="window.open('https://wa.me/55${al.zap}')">
+
+WHATSAPP
+
+</button>
+
+<button class="btn"
+style="background:red"
+onclick="excluirAluno(${al.id})">
+
+EXCLUIR
+
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+document.querySelector('#alunos input')
+.onkeyup=pesquisarAluno;
+
+
+// HORÁRIOS
+
+const horariosSemana=[
+"13:00 às 14:00",
+"14:00 às 15:00",
+"15:00 às 16:00",
+"16:00 às 17:00"
+];
+
+const horariosSabado=[
+
+"08:00 às 09:00",
+"09:00 às 10:00",
+"10:00 às 11:00",
+"11:00 às 12:00",
+
+"13:00 às 14:00",
+"14:00 às 15:00",
+"15:00 às 16:00",
+"16:00 às 17:00"
+
+];
+
+
+// AGENDA
+
+function renderAgenda(){
+
+let lista=document.getElementById("lista-agenda");
+
+lista.innerHTML="";
+
+["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]
+
+.forEach(dia=>{
+
+lista.innerHTML+=`
+
+<div class="card">
+
+<h3>${dia}</h3>
+
+<div id="agenda-${dia}">
+
+Nenhum aluno
+
+</div>
+
+</div>
+
+`;
+
+});
+
+atualizarAgenda();
+
+}
+
+function atualizarAgenda(){
+
+["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]
+
+.forEach(dia=>{
+
+let div=document.getElementById("agenda-"+dia);
+
+if(!div)return;
+
+let listaDia=alunos.filter(
+a=>a.agenda && a.agenda[dia]
+);
+
+if(listaDia.length==0){
+
+div.innerHTML="Nenhum aluno";
+
+}else{
+
+div.innerHTML="";
+
+listaDia
+.sort((a,b)=>
+a.agenda[dia]
+.localeCompare(
+b.agenda[dia]
+))
+
+.forEach(al=>{
+
+div.innerHTML+=`
+
+<div style="
+padding:10px;
+border-bottom:1px solid #eee">
+
+<b>${al.agenda[dia]}</b>
+
+<br>
+
+${al.nome}
+
+</div>
+
+`;
+
+});
+
+}
+
+});
+
+}
+
+renderAgenda();
+<h3>Horários</h3>
+
+<select id="seg">
+<option value="">Segunda - Sem aula</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+
+<select id="ter">
+<option value="">Terça - Sem aula</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+
+<select id="qua">
+<option value="">Quarta - Sem aula</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+
+<select id="qui">
+<option value="">Quinta - Sem aula</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+
+<select id="sex">
+<option value="">Sexta - Sem aula</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+
+<select id="sab">
+<option value="">Sábado - Sem aula</option>
+<option>08:00 às 09:00</option>
+<option>09:00 às 10:00</option>
+<option>10:00 às 11:00</option>
+<option>11:00 às 12:00</option>
+<option>13:00 às 14:00</option>
+<option>14:00 às 15:00</option>
+<option>15:00 às 16:00</option>
+<option>16:00 às 17:00</option>
+</select>
+agenda:{
+Segunda:document.getElementById("seg").value,
+Terça:document.getElementById("ter").value,
+Quarta:document.getElementById("qua").value,
+Quinta:document.getElementById("qui").value,
+Sexta:document.getElementById("sex").value,
+Sábado:document.getElementById("sab").value
+},
+let conflito = alunos.find(a=>
+
+(a.agenda?.Segunda===aluno.agenda.Segunda && aluno.agenda.Segunda!="")
+||
+
+(a.agenda?.Terça===aluno.agenda.Terça && aluno.agenda.Terça!="")
+||
+
+(a.agenda?.Quarta===aluno.agenda.Quarta && aluno.agenda.Quarta!="")
+||
+
+(a.agenda?.Quinta===aluno.agenda.Quinta && aluno.agenda.Quinta!="")
+||
+
+(a.agenda?.Sexta===aluno.agenda.Sexta && aluno.agenda.Sexta!="")
+||
+
+(a.agenda?.Sábado===aluno.agenda.Sábado && aluno.agenda.Sábado!="")
+
+);
+
+if(conflito){
+
+alert("Esse horário já está ocupado.");
+
+return;
+
+}
+let alunos = JSON.parse(localStorage.getItem("alunos_reforco")) || [];
+const meses = [
+
+"Jan",
+"Fev",
+"Mar",
+"Abr",
+"Mai",
+"Jun",
+"Jul",
+"Ago",
+"Set",
+"Out",
+"Nov",
+"Dez"
+
+];
+pagos:[]
+let aluno={
+
+id:Date.now(),
+
+nome:document.getElementById("nome").value,
+
+responsavel:document.getElementById("responsavel").value,
+
+zap:document.getElementById("zap").value,
+
+valor:document.getElementById("valor").value,
+
+vencimento:document.getElementById("vencimento").value,
+
+obs:document.getElementById("obs").value,
+
+pagos:[],
+
+agenda:{
+...
+}
+
+};
+function renderAlunos(){
+
+let lista=document.getElementById("lista-alunos");
+
+lista.innerHTML="";
+
+alunos.forEach(al=>{
+
+lista.innerHTML+=`
+
+<div class="card">
+
+<h3>${al.nome}</h3>
+
+Responsável: ${al.responsavel}
+
+<br><br>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:5px">
+
+${meses.map(m=>
+
+`<button
+onclick="togglePagamento(${al.id},'${m}')"
+
+style="
+padding:8px;
+border:none;
+border-radius:5px;
+
+background:
+
+${al.pagos.includes(m)
+?'#27ae60'
+:'#ddd'}
+
+">
+
+${m}
+
+</button>`
+
+).join("")}
+
+</div>
+
+<br>
+
+<button class="btn"
+style="background:#25D366"
+onclick="window.open('https://wa.me/55${al.zap}')">
+
+WHATSAPP
+
+</button>
+
+<button class="btn"
+style="background:red"
+onclick="excluirAluno(${al.id})">
+
+EXCLUIR
+
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+function togglePagamento(id,mes){
+
+let aluno=alunos.find(
+a=>a.id==id
+);
+
+if(aluno.pagos.includes(mes)){
+
+aluno.pagos=
+aluno.pagos.filter(
+m=>m!=mes
+);
+
+}else{
+
+aluno.pagos.push(mes);
+
+}
+
+localStorage.setItem(
+"alunos_reforco",
+JSON.stringify(alunos)
+);
+
+renderAlunos();
+
+atualizarFinanceiro();
+
+}
+function atualizarFinanceiro(){
+
+let mesAtual=
+meses[new Date().getMonth()];
+
+let recebido=0;
+
+let pendente=0;
+
+alunos.forEach(al=>{
+
+let valor=
+parseFloat(al.valor)||0;
+
+if(al.pagos.includes(mesAtual)){
+
+recebido+=valor;
+
+}else{
+
+pendente+=valor;
+
+}
+
+});
+
+document.getElementById("recebido")
+.innerHTML=
+"R$ "+recebido.toFixed(2);
+
+document.getElementById("pendente")
+.innerHTML=
+"R$ "+pendente.toFixed(2);
+
+}
+renderAlunos();
+atualizarFinanceiro();
+<div id="area-matricula" style="display:none;background:white;padding:30px">
+
+<center>
+
+<h1>APRENDENDO COM AMOR</h1>
+
+<p>REFORÇO ESCOLAR E APOIO PEDAGÓGICO</p>
+
+<h2>FICHA DE MATRÍCULA</h2>
+
+</center>
+
+<hr>
+
+<p><b>ALUNO:</b> <span id="mat-nome"></span></p>
+
+<p><b>RESPONSÁVEL:</b> <span id="mat-responsavel"></span></p>
+
+<p><b>WHATSAPP:</b> <span id="mat-zap"></span></p>
+
+<p><b>MENSALIDADE:</b> R$ <span id="mat-valor"></span></p>
+
+<p><b>VENCIMENTO:</b> DIA <span id="mat-venc"></span></p>
+
+<hr>
+
+<h3>HORÁRIOS</h3>
+
+<p>SEGUNDA: <span id="mat-seg"></span></p>
+
+<p>TERÇA: <span id="mat-ter"></span></p>
+
+<p>QUARTA: <span id="mat-qua"></span></p>
+
+<p>QUINTA: <span id="mat-qui"></span></p>
+
+<p>SEXTA: <span id="mat-sex"></span></p>
+
+<p>SÁBADO: <span id="mat-sab"></span></p>
+
+<hr>
+
+<h3>OBSERVAÇÕES</h3>
+
+<p id="mat-obs"></p>
+
+<br><br><br>
+
+<center>
+
+___________________________________
+
+<br>
+
+Assinatura do Responsável
+
+</center>
+
+</div>
+<div id="area-recibo" style="display:none;background:white;padding:30px">
+
+<center>
+
+<h2>APRENDENDO COM AMOR</h2>
+
+<p>REFORÇO ESCOLAR E APOIO PEDAGÓGICO</p>
+
+<hr>
+
+<h3>RECIBO DE PAGAMENTO</h3>
+
+</center>
+
+<p><b>NÚMERO:</b> <span id="rec-num"></span></p>
+
+<p><b>ALUNO:</b> <span id="rec-aluno"></span></p>
+
+<p><b>RESPONSÁVEL:</b> <span id="rec-responsavel"></span></p>
+
+<p><b>MÊS:</b> <span id="rec-mes"></span></p>
+
+<p><b>VALOR:</b> R$ <span id="rec-valor"></span></p>
+
+<p><b>DATA:</b> <span id="rec-data"></span></p>
+
+<br><br>
+
+<center>
+
+__________________________________
+
+<br>
+
+Assinatura
+
+</center>
+
+</div>
+function gerarMatricula(id){
+
+let al=alunos.find(
+a=>a.id==id
+);
+
+document.getElementById("mat-nome").innerHTML=al.nome;
+
+document.getElementById("mat-responsavel").innerHTML=al.responsavel;
+
+document.getElementById("mat-zap").innerHTML=al.zap;
+
+document.getElementById("mat-valor").innerHTML=al.valor;
+
+document.getElementById("mat-venc").innerHTML=al.vencimento;
+
+document.getElementById("mat-seg").innerHTML=al.agenda?.Segunda||"-";
+
+document.getElementById("mat-ter").innerHTML=al.agenda?.Terça||"-";
+
+document.getElementById("mat-qua").innerHTML=al.agenda?.Quarta||"-";
+
+document.getElementById("mat-qui").innerHTML=al.agenda?.Quinta||"-";
+
+document.getElementById("mat-sex").innerHTML=al.agenda?.Sexta||"-";
+
+document.getElementById("mat-sab").innerHTML=al.agenda?.Sábado||"-";
+
+document.getElementById("mat-obs").innerHTML=al.obs;
+
+document.getElementById("main-content").style.display="none";
+
+document.getElementById("area-matricula").style.display="block";
+
+window.print();
+
+}
+function gerarRecibo(id){
+
+let al=alunos.find(
+a=>a.id==id
+);
+
+document.getElementById("rec-num").innerHTML=
+Date.now();
+
+document.getElementById("rec-aluno").innerHTML=
+al.nome;
+
+document.getElementById("rec-responsavel").innerHTML=
+al.responsavel;
+
+document.getElementById("rec-mes").innerHTML=
+meses[new Date().getMonth()];
+
+document.getElementById("rec-valor").innerHTML=
+al.valor;
+
+document.getElementById("rec-data").innerHTML=
+new Date().toLocaleDateString("pt-BR");
+
+document.getElementById("main-content").style.display="none";
+
+document.getElementById("area-recibo").style.display="block";
+
+window.print();
+
+}
+window.onafterprint=function(){
+
+document.getElementById("area-matricula").style.display="none";
+
+document.getElementById("area-recibo").style.display="none";
+
+document.getElementById("main-content").style.display="block";
+
+}
+function exportarBackup(){
+
+let dados=JSON.stringify(alunos);
+
+let blob=new Blob(
+[dados],
+{type:"application/json"}
+);
+
+let url=URL.createObjectURL(blob);
+
+let a=document.createElement("a");
+
+a.href=url;
+
+a.download="backup_aprendendo_com_amor.json";
+
+a.click();
+
+URL.revokeObjectURL(url);
+
+}
+function importarBackup(event){
+
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+try{
+
+alunos=JSON.parse(e.target.result);
+
+localStorage.setItem(
+"alunos_reforco",
+JSON.stringify(alunos)
+);
+
+renderAlunos();
+
+atualizarFinanceiro();
+
+alert("Backup restaurado!");
+
+}catch{
+
+alert("Arquivo inválido");
+
+}
+
+}
+
+reader.readAsText(event.target.files[0]);
+
+}
+faltas:[]
+function registrarFalta(id){
+
+let al=alunos.find(
+a=>a.id==id
+);
+
+al.faltas.push(
+new Date().toLocaleDateString("pt-BR")
+);
+
+localStorage.setItem(
+"alunos_reforco",
+JSON.stringify(alunos)
+);
+
+alert("Falta registrada");
+
+}
+function editarAluno(id){
+
+let al=alunos.find(
+a=>a.id==id
+);
+
+document.getElementById("nome").value=al.nome;
+
+document.getElementById("responsavel").value=al.responsavel;
+
+document.getElementById("zap").value=al.zap;
+
+document.getElementById("valor").value=al.valor;
+
+document.getElementById("vencimento").value=al.vencimento;
+
+document.getElementById("obs").value=al.obs;
+
+excluirAluno(id);
+
+abrirCadastro();
+
+}
+@media print{
+
+body{
+background:white;
+}
+
+.bottom-nav,
+.btn,
+.modal,
+.app-header{
+
+display:none !important;
+
+}
+
+#area-matricula,
+#area-recibo{
+
+display:block !important;
+
+width:100%;
+
+padding:40px;
+
+font-size:16px;
+
+}
+
+}
