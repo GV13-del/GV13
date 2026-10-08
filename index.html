@@ -1,1060 +1,363 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Aprendendo com Amor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Search</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: space-between;
+            background-color: #fff;
+        }
 
-:root{
---primary:#ff6b6b;
---secondary:#4ecdc4;
---success:#27ae60;
---danger:#e74c3c;
---dark:#2d3436;
---light:#f5f5f5;
-}
+        /* TOPO DA TELA */
+        header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px 20px;
+            font-size: 13px;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Segoe UI,sans-serif;
-}
+        header a, header span {
+            color: #000;
+            text-decoration: none;
+            margin-left: 15px;
+        }
 
-body{
-background:var(--light);
-padding-bottom:90px;
-}
+        header a:hover {
+            text-decoration: underline;
+        }
 
-.app-header{
-background:white;
-padding:15px;
-text-align:center;
-position:sticky;
-top:0;
-border-bottom:1px solid #ddd;
-}
+        .login-btn {
+            background-color: #1a73e8;
+            color: white !important;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.section{
-display:none;
-padding:15px;
-max-width:700px;
-margin:auto;
-}
+        .logout-link {
+            color: #d93025;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-.section.active{
-display:block;
-}
+        /* SEÇÕES DA PÁGINA */
+        .page-section {
+            display: none;
+        }
 
-.card{
-background:white;
-padding:15px;
-margin-bottom:15px;
-border-radius:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.05);
-}
+        /* TELA 1: HOME DE BUSCA */
+        #section-home {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: center;
+            transform: translateY(-30px);
+        }
 
-.btn{
-width:100%;
-padding:14px;
-border:none;
-border-radius:10px;
-font-weight:bold;
-color:white;
-background:var(--dark);
-margin-top:10px;
-}
+        .logo {
+            font-size: 85px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 25px;
+            user-select: none;
+            cursor: pointer;
+        }
 
-input,select,textarea{
-width:100%;
-padding:12px;
-border:1px solid #ddd;
-border-radius:10px;
-margin-top:8px;
-}
+        .n-blue { color: #4285F4; }
+        .n-red { color: #EA4335; }
+        .n-yellow { color: #FBBC05; }
+        .n-green { color: #34A853; }
 
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:white;
-display:flex;
-justify-content:space-around;
-padding:10px 0;
-border-top:1px solid #ddd;
-}
+        .search-container {
+            width: 100%;
+            max-width: 584px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 10px;
+        }
 
-.nav-item{
-border:none;
-background:none;
-font-size:11px;
-color:gray;
-}
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            outline: none;
+        }
 
-.nav-item.active{
-color:var(--primary);
-font-weight:bold;
-}
+        .search-box:focus {
+            box-shadow: 0 1px 6px rgba(32,33,36,0.28);
+            border-color: transparent;
+        }
 
-.modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.7);
-justify-content:center;
-align-items:flex-end;
-}
+        .button-container {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+        }
 
-.modal-content{
-background:white;
-width:100%;
-max-width:600px;
-padding:20px;
-border-radius:20px 20px 0 0;
-max-height:90vh;
-overflow:auto;
-}
+        .btn {
+            background-color: #f8f9fa;
+            border: 1px solid #f8f9fa;
+            border-radius: 4px;
+            color: #3c4043;
+            font-size: 14px;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
 
-#login-screen{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:white;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
+        .btn:hover {
+            border: 1px solid #dadce0;
+            color: #202124;
+        }
 
-.login-box{
-width:90%;
-max-width:350px;
-padding:30px;
-background:white;
-border-radius:20px;
-box-shadow:0 5px 20px rgba(0,0,0,.1);
-text-align:center;
-border-top:5px solid var(--primary);
-}
+        /* TELA 2: RESULTADOS REALISTAS */
+        #section-results {
+            flex-direction: column;
+            flex-grow: 1;
+        }
 
-</style>
+        .results-header {
+            display: flex;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid #ebebeb;
+            gap: 30px;
+        }
+
+        .results-logo {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            cursor: pointer;
+        }
+
+        .results-search-box {
+            width: 100%;
+            max-width: 692px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            outline: none;
+        }
+
+        .results-content {
+            padding: 30px 40px 30px 180px;
+            max-width: 800px;
+        }
+
+        .results-stats {
+            font-size: 14px;
+            color: #70757a;
+            margin-bottom: 25px;
+        }
+
+        .search-result {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .result-source {
+            font-size: 13px;
+            color: #202124;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .result-title {
+            font-size: 20px;
+            color: #1a0dab;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-snippet {
+            font-size: 14px;
+            color: #4d5156;
+            line-height: 1.58;
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: #70757a;
+            font-style: italic;
+        }
+
+        /* MODAIS */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+        }
+
+        .modal-box h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .modal-box input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .modal-box .primary-btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 18px;
+            color: #70757a;
+            margin-top: -10px;
+        }
+
+        /* RODAPÉ */
+        footer {
+            background-color: #f2f2f2;
+            font-size: 14px;
+            color: #70757a;
+            border-top: 1px solid #e4e4e4;
+        }
+
+        .footer-credits {
+            padding: 12px 30px;
+            border-bottom: 1px solid #e4e4e4;
+            font-weight: bold;
+            color: #4f5357;
+            font-size: 13px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 30px;
+        }
+
+        .footer-links a {
+            color: #70757a;
+            text-decoration: none;
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="login-screen">
-
-<div class="login-box">
-
-<h2 style="color:#ff6b6b">
-APRENDENDO COM AMOR
-</h2>
-
-<input type="password" id="senha" placeholder="Senha">
-
-<button class="btn"
-style="background:#ff6b6b"
-onclick="login()">
-
-ENTRAR
-
-</button>
-
-</div>
-
-</div>
-
-<div id="main-content" style="display:none">
-
-<div class="app-header">
-
-<h2>APRENDENDO COM AMOR</h2>
-
-</div>
-
-<section id="inicio" class="section active">
-
-<div class="card">
-
-<h3 id="hoje"></h3>
-
-</div>
-
-<div class="card">
-
-Recebido no mês
-
-<h2 id="recebido"
-style="color:green">
-
-R$ 0,00
-
-</h2>
-
-</div>
-
-<div class="card">
-
-Pendente no mês
-
-<h2 id="pendente"
-style="color:red">
-
-R$ 0,00
-
-</h2>
-
-</div>
-
-<div class="card">
-
-Total de alunos
-
-<h2 id="total-alunos">
-
-0
-
-</h2>
-
-</div>
-
-</section>
-
-<section id="alunos" class="section">
-
-<input
-id="pesquisa"
-placeholder="Pesquisar aluno">
-
-<div id="lista-alunos"></div>
-
-<button
-class="btn"
-style="
-position:fixed;
-right:20px;
-bottom:100px;
-width:60px;
-height:60px;
-border-radius:50%;
-background:#ff6b6b;
-font-size:25px"
-onclick="abrirCadastro()">
-
-+
-
-</button>
-
-</section>
-
-<section id="agenda" class="section">
-
-<div id="lista-agenda"></div>
-
-</section>
-
-<section id="sistema" class="section">
-
-<div class="card">
-
-<button class="btn">
-
-FICHA DE MATRÍCULA
-
-</button>
-
-<button
-class="btn"
-style="background:green">
-
-BACKUP
-
-</button>
-
-</div>
-
-</section>
-
-<nav class="bottom-nav">
-
-<button class="nav-item active"
-onclick="trocarAba('inicio',this)">
-🏠<br>INÍCIO
-</button>
-
-<button class="nav-item"
-onclick="trocarAba('alunos',this)">
-👥<br>ALUNOS
-</button>
-
-<button class="nav-item"
-onclick="trocarAba('agenda',this)">
-📅<br>AGENDA
-</button>
-
-<button class="nav-item"
-onclick="trocarAba('sistema',this)">
-⚙️<br>SISTEMA
-</button>
-
-</nav>
-
-<div class="modal" id="modalCadastro">
-
-<div class="modal-content">
-
-<h3>Novo Aluno</h3>
-
-<input id="nome" placeholder="Nome">
-
-<input id="responsavel" placeholder="Responsável">
-
-<input id="zap" placeholder="WhatsApp">
-
-<input id="valor" placeholder="Mensalidade">
-
-<input id="vencimento" placeholder="Dia vencimento">
-
-<textarea id="obs"
-placeholder="Observações"></textarea>
-<h3 style="margin-top:15px">
-Horários
-</h3>
-
-<select id="seg">
-<option value="">Segunda - Sem aula</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<select id="ter">
-<option value="">Terça - Sem aula</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<select id="qua">
-<option value="">Quarta - Sem aula</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<select id="qui">
-<option value="">Quinta - Sem aula</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<select id="sex">
-<option value="">Sexta - Sem aula</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<select id="sab">
-<option value="">Sábado - Sem aula</option>
-<option>08:00 às 09:00</option>
-<option>09:00 às 10:00</option>
-<option>10:00 às 11:00</option>
-<option>11:00 às 12:00</option>
-<option>13:00 às 14:00</option>
-<option>14:00 às 15:00</option>
-<option>15:00 às 16:00</option>
-<option>16:00 às 17:00</option>
-</select>
-
-<button class="btn"
-style="background:#ff6b6b"
-onclick="salvarAluno()">
-
-SALVAR
-
-</button>
-
-<button class="btn"
-onclick="fecharCadastro()">
-
-FECHAR
-
-</button>
-
-</div>
-</div>
-
-<script>
-
-let alunos =
-JSON.parse(localStorage.getItem("alunos_reforco")) || [];
-
-const meses=[
-"Jan","Fev","Mar","Abr","Mai","Jun",
-"Jul","Ago","Set","Out","Nov","Dez"
-];
-
-function login(){
-
-if(document.getElementById("senha").value=="reforco"){
-
-document.getElementById("login-screen").style.display="none";
-
-document.getElementById("main-content").style.display="block";
-
-renderAlunos();
-
-atualizarFinanceiro();
-
-renderAgenda();
-
-}else{
-
-alert("Senha incorreta");
-
-}
-
-}
-
-function abrirCadastro(){
-
-document.getElementById("modalCadastro").style.display="flex";
-
-}
-
-function fecharCadastro(){
-
-document.getElementById("modalCadastro").style.display="none";
-
-}
-
-function trocarAba(id,botao){
-
-document.querySelectorAll(".section")
-.forEach(x=>x.classList.remove("active"));
-
-document.querySelectorAll(".nav-item")
-.forEach(x=>x.classList.remove("active"));
-
-document.getElementById(id)
-.classList.add("active");
-
-botao.classList.add("active");
-
-}
-function salvarAluno(){
-
-let aluno={
-
-id:Date.now(),
-
-nome:document.getElementById("nome").value,
-
-responsavel:document.getElementById("responsavel").value,
-
-zap:document.getElementById("zap").value,
-
-valor:document.getElementById("valor").value,
-
-vencimento:document.getElementById("vencimento").value,
-
-obs:document.getElementById("obs").value,
-
-pagos:[],
-
-agenda:{
-
-Segunda:document.getElementById("seg").value,
-
-Terça:document.getElementById("ter").value,
-
-Quarta:document.getElementById("qua").value,
-
-Quinta:document.getElementById("qui").value,
-
-Sexta:document.getElementById("sex").value,
-
-Sábado:document.getElementById("sab").value
-
-}
-
-};
-
-if(aluno.nome==""){
-
-alert("Digite o nome");
-
-return;
-
-}
-
-alunos.push(aluno);
-
-localStorage.setItem(
-"alunos_reforco",
-JSON.stringify(alunos)
-);
-
-fecharCadastro();
-
-renderAlunos();
-
-renderAgenda();
-
-atualizarFinanceiro();
-
-}
-
-function renderAlunos(){
-
-let lista=
-document.getElementById(
-"lista-alunos"
-);
-
-lista.innerHTML="";
-
-alunos.forEach(al=>{
-
-lista.innerHTML+=`
-
-<div class="card">
-
-<h3>${al.nome}</h3>
-
-Responsável:
-${al.responsavel}
-
-<br><br>
-
-<button class="btn"
-
-style="background:#25D366"
-
-onclick="window.open('https://wa.me/55${al.zap}')">
-
-WHATSAPP
-
-</button>
-
-<button class="btn"
-
-style="background:red"
-
-onclick="excluirAluno(${al.id})">
-
-EXCLUIR
-
-</button>
-
-</div>
-
-`;
-
-});
-
-}
-
-function excluirAluno(id){
-
-if(confirm("Excluir aluno?")){
-
-alunos=
-alunos.filter(
-a=>a.id!=id
-);
-
-localStorage.setItem(
-"alunos_reforco",
-JSON.stringify(alunos)
-);
-
-renderAlunos();
-
-renderAgenda();
-
-atualizarFinanceiro();
-
-}
-
-}
-
-document
-.getElementById("pesquisa")
-.onkeyup=function(){
-
-let texto=
-this.value.toLowerCase();
-
-document
-.getElementById(
-"lista-alunos"
-)
-.innerHTML="";
-
-alunos
-
-.filter(a=>
-
-a.nome
-.toLowerCase()
-.includes(texto)
-
-||
-
-a.responsavel
-.toLowerCase()
-.includes(texto)
-
-)
-
-.forEach(al=>{
-
-document
-.getElementById(
-"lista-alunos"
-)
-
-.innerHTML+=`
-
-<div class="card">
-
-<h3>${al.nome}</h3>
-
-Responsável:
-${al.responsavel}
-
-</div>
-
-`;
-
-});
-
-};
-function renderAgenda(){
-
-let lista=document.getElementById("lista-agenda");
-
-lista.innerHTML="";
-
-["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]
-
-.forEach(dia=>{
-
-lista.innerHTML+=`
-
-<div class="card">
-
-<h3>${dia}</h3>
-
-<div id="dia-${dia}">
-
-Nenhum aluno
-
-</div>
-
-</div>
-
-`;
-
-});
-
-atualizarAgenda();
-
-}
-
-function atualizarAgenda(){
-
-["Segunda","Terça","Quarta","Quinta","Sexta","Sábado"]
-
-.forEach(dia=>{
-
-let div=document.getElementById("dia-"+dia);
-
-if(!div)return;
-
-let listaDia=alunos.filter(
-
-a=>a.agenda && a.agenda[dia]
-
-);
-
-if(listaDia.length==0){
-
-div.innerHTML="Nenhum aluno";
-
-}
-
-else{
-
-div.innerHTML="";
-
-listaDia
-
-.sort((a,b)=>
-
-(a.agenda[dia]||"")
-
-.localeCompare(
-
-b.agenda[dia]||""
-
-)
-
-)
-
-.forEach(al=>{
-
-div.innerHTML+=`
-
-<div style="padding:10px;border-bottom:1px solid #ddd">
-
-<b>${al.agenda[dia]}</b>
-
-<br>
-
-${al.nome}
-
-</div>
-
-`;
-
-});
-
-}
-
-});
-
-}
-
-function atualizarFinanceiro(){
-
-let mesAtual=
-
-meses[new Date().getMonth()];
-
-let recebido=0;
-
-let pendente=0;
-
-alunos.forEach(al=>{
-
-let valor=parseFloat(al.valor)||0;
-
-if(al.pagos.includes(mesAtual))
-
-recebido+=valor;
-
-else
-
-pendente+=valor;
-
-});
-
-document.getElementById("recebido")
-
-.innerHTML=
-
-"R$ "+recebido.toFixed(2);
-
-document.getElementById("pendente")
-
-.innerHTML=
-
-"R$ "+pendente.toFixed(2);
-
-document.getElementById("total-alunos")
-
-.innerHTML=
-
-alunos.length;
-
-document.getElementById("hoje")
-
-.innerHTML=
-
-new Date().toLocaleDateString(
-
-"pt-BR",
-
-{
-
-weekday:"long",
-
-day:"numeric",
-
-month:"long"
-
-}
-
-);
-
-}
-function togglePagamento(id,mes){
-
-let al=alunos.find(a=>a.id==id);
-
-if(!al.pagos)
-al.pagos=[];
-
-if(al.pagos.includes(mes)){
-
-al.pagos=al.pagos.filter(
-m=>m!=mes
-);
-
-}else{
-
-al.pagos.push(mes);
-
-}
-
-localStorage.setItem(
-"alunos_reforco",
-JSON.stringify(alunos)
-);
-
-renderAlunos();
-
-atualizarFinanceiro();
-
-}
-
-function renderAlunos(){
-
-let lista=document.getElementById(
-"lista-alunos"
-);
-
-lista.innerHTML="";
-
-alunos.forEach(al=>{
-
-lista.innerHTML+=`
-
-<div class="card">
-
-<h3>${al.nome}</h3>
-
-Responsável:
-${al.responsavel}
-
-<br><br>
-
-<div style="
-display:grid;
-grid-template-columns:
-repeat(4,1fr);
-gap:5px">
-
-${meses.map(m=>
-
-`<button
-
-style="
-padding:8px;
-border:none;
-border-radius:5px;
-background:
-
-${al.pagos.includes(m)
-?"#27ae60"
-:"#ddd"}
-
-"
-
-onclick="togglePagamento(
-${al.id},
-'${m}'
-)">
-
-${m}
-
-</button>`
-
-).join("")}
-
-</div>
-
-<br>
-
-<button class="btn"
-
-style="background:#25D366"
-
-onclick="window.open(
-'https://wa.me/55${al.zap}'
-)">
-
-WHATSAPP
-
-</button>
-
-<button class="btn"
-
-onclick="gerarMatricula(
-${al.id}
-)">
-
-MATRÍCULA
-
-</button>
-
-<button class="btn"
-
-style="background:#4ecdc4"
-
-onclick="gerarRecibo(
-${al.id}
-)">
-
-RECIBO
-
-</button>
-
-<button class="btn"
-
-style="background:red"
-
-onclick="excluirAluno(
-${al.id}
-)">
-
-EXCLUIR
-
-</button>
-
-</div>
-
-`;
-
-});
-
-}
-function gerarMatricula(id){
-
-let al=alunos.find(a=>a.id==id);
-
-let janela=window.open("","_blank");
-
-janela.document.write(`
-
-<h1 style="text-align:center">
-APRENDENDO COM AMOR
-</h1>
-
-<h2 style="text-align:center">
-FICHA DE MATRÍCULA
-</h2>
-
-<hr>
-
-<p><b>Aluno:</b> ${al.nome}</p>
-
-<p><b>Responsável:</b> ${al.responsavel}</p>
-
-<p><b>WhatsApp:</b> ${al.zap}</p>
-
-<p><b>Mensalidade:</b> R$ ${al.valor}</p>
-
-<p><b>Vencimento:</b> Dia ${al.vencimento}</p>
-
-<h3>Horários</h3>
-
-<p>Segunda: ${al.agenda.Segunda||"-"}</p>
-
-<p>Terça: ${al.agenda.Terça||"-"}</p>
-
-<p>Quarta: ${al.agenda.Quarta||"-"}</p>
-
-<p>Quinta: ${al.agenda.Quinta||"-"}</p>
-
-<p>Sexta: ${al.agenda.Sexta||"-"}</p>
-
-<p>Sábado: ${al.agenda.Sábado||"-"}</p>
-
-<h3>Observações</h3>
-
-<p>${al.obs}</p>
-
-<br><br><br>
-
-<center>
-
-________________________________
-
-<br>
-
-Assinatura do Responsável
-
-</center>
-
-`);
-
-janela.print();
-
-}
-
-function gerarRecibo(id){
-
-let al=alunos.find(a=>a.id==id);
-
-let janela=window.open("","_blank");
-
-janela.document.write(`
-
-<h1 style="text-align:center">
-APRENDENDO COM AMOR
-</h1>
-
-<h2 style="text-align:center">
-RECIBO DE PAGAMENTO
-</h2>
-
-<hr>
-
-<p><b>Aluno:</b> ${al.nome}</p>
-
-<p><b>Responsável:</b> ${al.responsavel}</p>
-
-<p><b>Valor:</b> R$ ${al.valor}</p>
-
-<p><b>Data:</b> ${new Date().toLocaleDateString("pt-BR")}</p>
-
-<br><br><br>
-
-<center>
-
-________________________________
-
-<br>
-
-Assinatura
-
-</center>
-
-`);
-
-janela.print();
-
-}
-
-</script>
-
-</body>
-</html>
+    <!-- CABEÇALHO -->
+    <header id="main-header">
+        <a href="#">Gmail</a>
+        <a href="#">Imagens</a>
+        <div id="auth-area">
+            <span onclick="openModal('login')" class="login-btn">Fazer login</span>
+        </div>
+    </header>
+
+    <!-- TELA 1: HOME PRINCIPAL -->
+    <div id="section-home" class="page-section" style="display: flex;">
+        <div class="logo" onclick="goToHome()">
+            <span class="n-blue">N</span><span class="n-red">e</span><span class="n-yellow">x</span><span class="n-blue">u</span><span class="n-green">s</span>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-box" autocomplete="off" autofocus onkeydown="checkEnter(event, 'home')">
+            
+            <div class="button-container">
+                <button type="button" class="btn" onclick="fetchResultsFromGoogle('home')">Pesquisa Nexus</button>
+                <button type="button" class="btn" onclick="fetchResultsFromGoogle('home')">Estou com sorte</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA 2: RESULTADOS REAIS DA API -->
+    <div id="section-results" class="page-section">
+        <div class="results-header">
+            <div class="results-logo" onclick="goToHome()">
+                <span class="n-blue">N</span><span class="n-red">e</span><span class="n-yellow">x</span><span class="n-blue">u</span><span class="n-green">s</span>
+            </div>
+            <input type="text" id="results-input" class="results-search-box" onkeydown="checkEnter(event, 'results')">
+        </div>
+        
+        <div class="results-content">
+            <div id="results-stats" class="results-stats"></div>
+            <!-- Os blocos de sites reais vão entrar aqui dentro dinamicamente -->
+            <div id="api-results-container"></div>
+        </div>
+    </div>
+
+    <!-- MODAIS DE ACESSO -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-btn" onclick="closeModal('login')">&times;</span>
+            <h2>Fazer Login</h2>
+            <input type="email" id="login-email" placeholder="E-mail">
+            <input type="password" id="login-pass" placeholder="Senha">
+            <button class="primary-btn" onclick="handleLogin()">Entrar</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-credits">Desenvolvido por GV13 Studios</div>
+        <div class="footer-links">
+            <div>
+                <a href="#" style="margin-right: 25px;">Sobre o Nexus</a>
+                <a href="#" style="margin-right: 25px;">Privacidade</a>
+                <a href="#">Termos</a>
+            </div>
+            <div><a href="#">Brasil</a></div>
+        </div>
+    </footer>
+
+    <script>
+        // CONFIGURAÇÕES DA API DO GOOGLE (INSIRA SUAS CHAVES AQUI)
+        const API_KEY = "SUA_API_KEY_AQUI";
+        const SEARCH_ENGINE_ID = "SEU_SEARCH_ENGINE_ID_AQUI";
+
+        document.addEventListener("DOMContentLoaded", checkLoginStatus);
+
+        // DISPARADOR PELO ENTER
+        function checkEnter(event, source) {
